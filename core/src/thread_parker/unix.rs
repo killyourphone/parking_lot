@@ -138,8 +138,11 @@ impl ThreadParker {
         let mut attr = MaybeUninit::<libc::pthread_condattr_t>::uninit();
         let r = libc::pthread_condattr_init(attr.as_mut_ptr());
         debug_assert_eq!(r, 0);
-        let r = libc::pthread_condattr_setclock(attr.as_mut_ptr(), libc::CLOCK_MONOTONIC);
-        debug_assert_eq!(r, 0);
+        #[cfg(not(target_os = "espidf"))]
+        {
+            let r = libc::pthread_condattr_setclock(attr.as_mut_ptr(), libc::CLOCK_MONOTONIC);
+            debug_assert_eq!(r, 0);
+        }
         let r = libc::pthread_cond_init(self.condvar.get(), attr.as_ptr());
         debug_assert_eq!(r, 0);
         let r = libc::pthread_condattr_destroy(attr.as_mut_ptr());
